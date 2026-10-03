@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import API from "../api/axios";
 import { money } from "../utils/format";
 import "./ItemForm.css";
@@ -12,9 +12,9 @@ export const CATEGORY_OPTIONS = [
   { value: "crates_gates_pens", label: "Crates, Gates and Pens" },
 ];
 
-/* Default size set used when creating a new item.
-   Admins can freely edit or clear this field. */
 export const DEFAULT_SIZES = "XS, S, M, L, XL, XXL";
+
+const MAX_IMAGES = 4;
 
 const EMPTY_FORM = {
   itemType: "dog_supply",
@@ -24,9 +24,43 @@ const EMPTY_FORM = {
   discountPercent: 20,
   category: "dog_clothing_accessories",
   stockStatus: "in_stock",
-  image: "",
   sizes: DEFAULT_SIZES,
 };
+
+function buildInitialImages(initialValues) {
+  if (!initialValues) return [""];
+
+  const source =
+    Array.isArray(initialValues.images) && initialValues.images.length
+      ? initialValues.images
+      : initialValues.image
+      ? [initialValues.image]
+      : [];
+
+  const list = source.map((url) => String(url || "").trim()).filter(Boolean);
+
+  if (list.length === 0) return [""];
+  if (list.length >= MAX_IMAGES) return list.slice(0, MAX_IMAGES);
+  return [...list, ""];
+}
+
+const UploadIcon = () => (
+  <svg
+    width="11"
+    height="11"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="17 8 12 3 7 8" />
+    <line x1="12" y1="3" x2="12" y2="15" />
+  </svg>
+);
 
 export default function ItemForm({
   initialValues,
@@ -35,21 +69,19 @@ export default function ItemForm({
   busy,
 }) {
   const [form, setForm] = useState({ ...EMPTY_FORM, ...(initialValues || {}) });
-  const [imageMode, setImageMode] = useState("url");
-  const [uploading, setUploading] = useState(false);
+  const [images, setImages] = useState(() => buildInitialImages(initialValues));
+  const [uploadingIndex, setUploadingIndex] = useState(null);
   const [error, setError] = useState("");
-  const fileRef = useRef(null);
 
   useEffect(() => {
     if (initialValues) {
-      // For editing an existing item: keep whatever sizes it already has,
-      // even if it's an empty string, so the admin doesn't accidentally
-      // re-populate sizes when they didn't intend to.
       setForm({ ...EMPTY_FORM, ...initialValues });
+      setImages(buildInitialImages(initialValues));
     }
   }, [initialValues]);
 
-  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const update = (key, value) =>
+    setForm((prev) => ({ ...prev, [key]: value }));
 
   const sellingPrice = useMemo(() => {
     const original = parseFloat(form.originalPrice);
@@ -62,11 +94,34 @@ export default function ItemForm({
     return selling.toFixed(2);
   }, [form.originalPrice, form.discountPercent]);
 
-  const handleFileUpload = async (event) => {
+  /* --- Image slot management --- */
+  const updateImageAt = (index, value) => {
+    setImages((prev) => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
+  };
+
+  const addSlot = () => {
+    setImages((prev) => {
+      if (prev.length >= MAX_IMAGES) return prev;
+      return [...prev, ""];
+    });
+  };
+
+  const removeSlot = (index) => {
+    setImages((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      return next.length ? next : [""];
+    });
+  };
+
+  const handleFileUpload = async (index, event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    setUploading(true);
+    setUploadingIndex(index);
     setError("");
 
     try {
@@ -77,17 +132,19 @@ export default function ItemForm({
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      update("image", data.url || data.secure_url);
+      updateImageAt(index, data.url || data.secure_url || "");
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          "Image upload failed. Please try the image URL option instead."
+          "Image upload failed. Please try the URL option instead."
       );
     } finally {
-      setUploading(false);
+      setUploadingIndex(null);
+      event.target.value = "";
     }
   };
 
+  /* --- Submit --- */
   const handleSubmit = (event) => {
     event.preventDefault();
     setError("");
@@ -104,8 +161,14 @@ export default function ItemForm({
       setError("Please enter a valid original price.");
       return;
     }
-    if (!form.image.trim()) {
-      setError("Please provide a product image (URL or file upload).");
+
+    const cleanImages = images
+      .map((url) => String(url || "").trim())
+      .filter(Boolean)
+      .slice(0, MAX_IMAGES);
+
+    if (cleanImages.length === 0) {
+      setError("Please add at least one product image.");
       return;
     }
 
@@ -118,15 +181,18 @@ export default function ItemForm({
       sellingPrice: Number(sellingPrice),
       category: form.category,
       stockStatus: form.stockStatus,
-      image: form.image.trim(),
       sizes: form.sizes
         ? form.sizes
             .split(",")
             .map((size) => size.trim())
             .filter(Boolean)
         : [],
+      image: cleanImages[0],
+      images: cleanImages,
     });
   };
+
+  const filledCount = images.filter((url) => String(url || "").trim()).length;
 
   return (
     <form className="item-form" onSubmit={handleSubmit}>
@@ -236,61 +302,99 @@ export default function ItemForm({
       </label>
 
       <section className="item-image-section">
-        <h3>Product Image</h3>
+        <header className="item-image-header">
+          <h3>Product Images</h3>
+          <span className="item-image-count">
+            {filledCount} / {MAX_IMAGES} · first image is the card thumbnail
+          </span>
+        </header>
 
-        <div className="image-mode-tabs">
-          <button
-            type="button"
-            className={imageMode === "url" ? "active" : ""}
-            onClick={() => setImageMode("url")}
-          >
-            Image Link / URL
-          </button>
-          <button
-            type="button"
-            className={imageMode === "file" ? "active" : ""}
-            onClick={() => setImageMode("file")}
-          >
-            Direct File Upload
-          </button>
+        <div className="image-slots">
+          {images.map((url, index) => {
+            const hasImage = !!String(url || "").trim();
+            const isUploading = uploadingIndex === index;
+            const isMain = index === 0;
+
+            return (
+              <div
+                key={index}
+                className={`image-slot ${hasImage ? "filled" : "empty"}`}
+              >
+                <div className="image-slot-preview">
+                  {hasImage ? (
+                    <img src={url} alt={`Product ${index + 1}`} />
+                  ) : (
+                    <span className="image-slot-number">{index + 1}</span>
+                  )}
+                  {isMain && hasImage && (
+                    <span className="image-slot-badge">Main</span>
+                  )}
+                </div>
+
+                <input
+                  type="url"
+                  className="image-slot-url"
+                  placeholder={
+                    hasImage
+                      ? "Replace with image URL"
+                      : isMain
+                      ? "Paste main image URL"
+                      : `Paste image ${index + 1} URL`
+                  }
+                  value={url}
+                  onChange={(event) =>
+                    updateImageAt(index, event.target.value)
+                  }
+                />
+
+                <div className="image-slot-actions">
+                  <label
+                    className={`image-slot-upload ${
+                      isUploading ? "busy" : ""
+                    }`}
+                  >
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(event) => handleFileUpload(index, event)}
+                      hidden
+                      disabled={isUploading}
+                    />
+                    <UploadIcon />
+                    <span>{isUploading ? "Uploading…" : "Upload"}</span>
+                  </label>
+
+                  {hasImage && (
+                    <button
+                      type="button"
+                      className="image-slot-remove"
+                      onClick={() => removeSlot(index)}
+                      aria-label={`Remove image ${index + 1}`}
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        {imageMode === "url" ? (
-          <label className="auth-field">
-            Image URL
-            <input
-              type="url"
-              value={form.image}
-              onChange={(event) => update("image", event.target.value)}
-              placeholder="https://res.cloudinary.com/..."
-            />
-          </label>
-        ) : (
-          <label className="auth-field">
-            Upload Image File
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileUpload}
-            />
-          </label>
-        )}
-
-        {uploading && <p className="uploading-note">Uploading image...</p>}
-
-        {form.image && (
-          <div className="image-preview">
-            <p>Image Preview</p>
-            <img src={form.image} alt="Product preview" />
-          </div>
+        {images.length < MAX_IMAGES && (
+          <button
+            type="button"
+            className="image-slot-add"
+            onClick={addSlot}
+          >
+            + Add another image
+          </button>
         )}
       </section>
 
       <button
         type="submit"
         className="btn-primary"
-        disabled={busy || uploading}
+        disabled={busy || uploadingIndex !== null}
       >
         {busy ? "Saving..." : submitLabel}
       </button>

@@ -23,6 +23,13 @@ export default function EditItem() {
         const product = data.product || data;
 
         if (mounted) {
+          const images =
+            Array.isArray(product.images) && product.images.length
+              ? product.images
+              : product.image
+              ? [product.image]
+              : [];
+
           setInitialValues({
             itemType: product.itemType,
             title: product.title,
@@ -32,6 +39,7 @@ export default function EditItem() {
             category: product.category,
             stockStatus: product.stockStatus,
             image: product.image,
+            images,
             sizes: (product.sizes || []).join(", "),
           });
         }

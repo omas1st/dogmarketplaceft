@@ -26,6 +26,7 @@ export default function ProductPreview() {
   const [size, setSize] = useState(DEFAULT_SIZES[0]);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [activeImage, setActiveImage] = useState("");
 
   const loadProduct = useCallback(async () => {
     setLoading(true);
@@ -38,11 +39,22 @@ export default function ProductPreview() {
 
       const loadedReviews = loaded.reviews || data.reviews || [];
       setReviews(loadedReviews);
+
       setSize(
         Array.isArray(loaded.sizes) && loaded.sizes.length
           ? loaded.sizes[0]
           : "One Size"
       );
+
+      // Build the gallery: prefer `images`, fall back to `image`, fall back to nothing
+      const gallery =
+        Array.isArray(loaded.images) && loaded.images.length
+          ? loaded.images
+          : loaded.image
+          ? [loaded.image]
+          : [];
+
+      setActiveImage(gallery[0] || "");
     } catch (err) {
       setError(
         err.response?.data?.message || "This item could not be loaded."
@@ -60,6 +72,14 @@ export default function ProductPreview() {
     product && Array.isArray(product.sizes) && product.sizes.length
       ? product.sizes
       : DEFAULT_SIZES;
+
+  const galleryImages = useMemo(() => {
+    if (!product) return [];
+    if (Array.isArray(product.images) && product.images.length)
+      return product.images;
+    if (product.image) return [product.image];
+    return [];
+  }, [product]);
 
   const averageRating = useMemo(() => {
     if (!reviews.length) return 0;
@@ -111,7 +131,29 @@ export default function ProductPreview() {
     <div className="product-preview">
       <div className="product-preview-top">
         <div className="product-preview-media">
-          <img src={product.image} alt={product.title} />
+          {activeImage && (
+            <div className="product-preview-main-image">
+              <img src={activeImage} alt={product.title} />
+            </div>
+          )}
+
+          {galleryImages.length > 1 && (
+            <div className="product-preview-thumbs">
+              {galleryImages.map((url, index) => (
+                <button
+                  key={`${url}-${index}`}
+                  type="button"
+                  className={`product-preview-thumb ${
+                    url === activeImage ? "active" : ""
+                  }`}
+                  onClick={() => setActiveImage(url)}
+                  aria-label={`View image ${index + 1}`}
+                >
+                  <img src={url} alt={`${product.title} view ${index + 1}`} />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="product-preview-details">
