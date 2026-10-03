@@ -42,11 +42,6 @@
   color: var(--text);
 }
 
-.review-item-date {
-  font-size: 12.5px;
-  color: var(--text-dim);
-}
-
 .review-item-comment {
   font-size: 14px;
   color: var(--text-muted);

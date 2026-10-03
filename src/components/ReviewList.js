@@ -1,6 +1,5 @@
 import React from "react";
 import StarRating from "./StarRating";
-import { formatDate } from "../utils/format";
 import "./ReviewList.css";
 
 export default function ReviewList({ reviews = [], canDelete, onDelete }) {
@@ -22,9 +21,6 @@ export default function ReviewList({ reviews = [], canDelete, onDelete }) {
         <li key={review._id} className="review-item">
           <div className="review-item-head">
             <span className="review-item-name">{review.name}</span>
-            <span className="review-item-date">
-              {formatDate(review.createdAt)}
-            </span>
           </div>
 
           <StarRating value={review.rating} readOnly size="sm" />
