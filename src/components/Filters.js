@@ -1,17 +1,6 @@
 import React from "react";
 import "./Filters.css";
 
-export const SHAPE_OPTIONS = [
-  { value: "all", label: "All Shapes" },
-  { value: "bone", label: "Bone" },
-  { value: "round", label: "Round" },
-  { value: "square", label: "Square" },
-  { value: "oval", label: "Oval" },
-  { value: "heart", label: "Heart" },
-  { value: "rectangle", label: "Rectangle" },
-  { value: "plush", label: "Plush" },
-];
-
 export const TYPE_OPTIONS = [
   { value: "all", label: "All Types" },
   { value: "toy", label: "Toy" },
@@ -42,12 +31,6 @@ export const SORT_OPTIONS = [
   { value: "price-desc", label: "Price: High to Low" },
   { value: "newest", label: "Newest" },
 ];
-
-const IconShape = () => (
-  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2 4 7v10l8 5 8-5V7l-8-5Z" />
-  </svg>
-);
 
 const IconType = () => (
   <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -101,24 +84,6 @@ export default function Filters({
   return (
     <section className="filters">
       <div className="filter-grid">
-        <div className="filter-item">
-          <span className="filter-label">
-            <IconShape />
-            Shape
-          </span>
-          <select
-            value={filters.shape}
-            onChange={(event) => update("shape", event.target.value)}
-            aria-label="Filter by shape"
-          >
-            {SHAPE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
         <div className="filter-item">
           <span className="filter-label">
             <IconType />

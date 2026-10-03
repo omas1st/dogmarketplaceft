@@ -13,7 +13,6 @@ const TABS = [
 ];
 
 const DEFAULT_FILTERS = {
-  shape: "all",
   type: "all",
   minPrice: "",
   maxPrice: "",
@@ -37,7 +36,6 @@ export default function Home() {
       const params = { itemType: tab };
 
       if (search) params.search = search;
-      if (filters.shape !== "all") params.shape = filters.shape;
       if (filters.type !== "all") params.type = filters.type;
       if (filters.minPrice !== "") params.minPrice = filters.minPrice;
       if (filters.maxPrice !== "") params.maxPrice = filters.maxPrice;
@@ -119,7 +117,6 @@ export default function Home() {
           onReset={handleResetFilters}
           sort={sort}
           onSortChange={setSort}
-          resultCount={products.length}
         />
       </div>
 
