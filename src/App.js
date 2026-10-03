@@ -1,25 +1,157 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import "./App.css";
 
-function App() {
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import CartDropdown from "./components/CartDropdown";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
+
+import Home from "./pages/Home";
+import SignIn from "./pages/SignIn";
+import CreateAccount from "./pages/CreateAccount";
+import ProductPreview from "./pages/ProductPreview";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import Processing from "./pages/Processing";
+import UserDashboard from "./pages/UserDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
+import AddItem from "./pages/AddItem";
+import EditItem from "./pages/EditItem";
+import NotFound from "./pages/NotFound";
+
+function Layout({ children }) {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Header />
+      <CartDropdown />
+      <main className="app-main">{children}</main>
+      <Footer />
+    </>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <div className="App">
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Layout>
+              <Home />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/signin"
+          element={
+            <Layout>
+              <SignIn />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/create-account"
+          element={
+            <Layout>
+              <CreateAccount />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/product/:id"
+          element={
+            <Layout>
+              <ProductPreview />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/cart"
+          element={
+            <Layout>
+              <Cart />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/checkout"
+          element={
+            <Layout>
+              <Checkout />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/processing"
+          element={
+            <Layout>
+              <Processing />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <UserDashboard />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <Layout>
+                <AdminDashboard />
+              </Layout>
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/items/new"
+          element={
+            <AdminRoute>
+              <Layout>
+                <AddItem />
+              </Layout>
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/items/:id/edit"
+          element={
+            <AdminRoute>
+              <Layout>
+                <EditItem />
+              </Layout>
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="*"
+          element={
+            <Layout>
+              <NotFound />
+            </Layout>
+          }
+        />
+      </Routes>
+    </div>
+  );
+}

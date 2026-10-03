@@ -1,0 +1,95 @@
+.admin-marketplace {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-marketplace-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.admin-marketplace-head h2 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.admin-items-table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 780px;
+  font-size: 13.5px;
+}
+
+.admin-items-table thead th {
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.admin-items-table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.admin-items-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.admin-items-table tbody tr:hover {
+  background: var(--surface-2);
+}
+
+.admin-thumb {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--r-sm);
+  object-fit: cover;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+}
+
+.admin-item-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.admin-item-actions .btn-ghost,
+.admin-item-actions .btn-danger {
+  padding: 6px 12px;
+  font-size: 12.5px;
+  width: auto;
+}
+
+@media (min-width: 640px) {
+  .admin-marketplace-head h2 {
+    font-size: 22px;
+  }
+  .admin-items-table {
+    font-size: 14px;
+  }
+}

@@ -1,0 +1,57 @@
+.review-form {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.review-form h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.review-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.review-form-field input,
+.review-form-field textarea {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  color: var(--text);
+  padding: 12px 14px;
+  font-size: 15px;
+  outline: none;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.review-form-field input::placeholder,
+.review-form-field textarea::placeholder {
+  color: var(--text-dim);
+}
+.review-form-field input:focus,
+.review-form-field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-ring);
+}
+.review-form-field textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.55;
+}

@@ -1,0 +1,60 @@
+.admin-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.admin-dashboard h1 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.admin-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-tab {
+  flex: 1;
+  min-width: max-content;
+  padding: 12px 20px;
+  border-radius: var(--r);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  transition: color var(--t-fast), background var(--t-fast);
+}
+.admin-tab:hover {
+  color: var(--text);
+}
+.admin-tab.active {
+  background: linear-gradient(180deg, var(--accent-hover), var(--accent));
+  color: #1a1204;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.28);
+}
+
+.admin-tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 1024px) {
+  .admin-dashboard h1 {
+    font-size: 30px;
+  }
+  .admin-tabs {
+    max-width: 520px;
+  }
+}

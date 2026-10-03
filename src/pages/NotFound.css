@@ -1,0 +1,38 @@
+.not-found {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.not-found h1 {
+  font-size: 72px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  background: linear-gradient(180deg, var(--accent), #7a4a00);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.not-found p {
+  color: var(--text-muted);
+  font-size: 15px;
+  max-width: 380px;
+}
+
+.not-found .btn-primary {
+  margin-top: 8px;
+  width: auto;
+}
+
+@media (min-width: 640px) {
+  .not-found h1 {
+    font-size: 100px;
+  }
+}

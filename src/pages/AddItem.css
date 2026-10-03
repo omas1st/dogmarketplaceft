@@ -1,0 +1,23 @@
+.add-item-page,
+.edit-item-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.add-item-page h1,
+.edit-item-page h1 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 1024px) {
+  .add-item-page h1,
+  .edit-item-page h1 {
+    font-size: 30px;
+  }
+}
