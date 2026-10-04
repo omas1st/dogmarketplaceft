@@ -121,6 +121,47 @@
   padding: 4px 10px;
 }
 
+/* ---------- Same-Day Delivery block ---------- */
+.same-day-delivery {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--r);
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+}
+
+.same-day-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  flex-shrink: 0;
+}
+
+.same-day-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.same-day-text strong {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #6ee7b7;
+  letter-spacing: -0.005em;
+}
+.same-day-text span {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
 .product-preview-description {
   display: flex;
   flex-direction: column;

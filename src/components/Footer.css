@@ -110,6 +110,26 @@
   opacity: 0.5;
 }
 
+/* ---------- WhatsApp link ---------- */
+.footer-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-dim);
+  transition: color var(--t-fast);
+}
+.footer-whatsapp:hover {
+  color: #25d366; /* WhatsApp green */
+}
+.footer-whatsapp svg {
+  flex-shrink: 0;
+  display: block;
+  transition: transform var(--t-fast);
+}
+.footer-whatsapp:hover svg {
+  transform: scale(1.1);
+}
+
 @media (min-width: 640px) {
   .footer {
     padding: 24px 24px 20px;

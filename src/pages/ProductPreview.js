@@ -12,6 +12,25 @@ import "./ProductPreview.css";
 
 const DEFAULT_SIZES = ["One Size"];
 
+const SameDayIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M3 7h11v8H3z" />
+    <path d="M14 10h4l3 3v2h-7z" />
+    <circle cx="7.5" cy="17.5" r="1.6" />
+    <circle cx="17.5" cy="17.5" r="1.6" />
+  </svg>
+);
+
 export default function ProductPreview() {
   const { id } = useParams();
   const { isAdmin } = useAuth();
@@ -183,6 +202,19 @@ export default function ProductPreview() {
           <p className={`stock-status ${inStock ? "in" : "out"}`}>
             {inStock ? "In Stock" : "Out of Stock"}
           </p>
+
+          <div className="same-day-delivery">
+            <span className="same-day-icon">
+              <SameDayIcon />
+            </span>
+            <div className="same-day-text">
+              <strong>Same-Day Delivery</strong>
+              <span>
+                Order today and get it delivered before the day ends — free
+                shipping.
+              </span>
+            </div>
+          </div>
 
           <div className="product-preview-description">
             <h3>Description</h3>

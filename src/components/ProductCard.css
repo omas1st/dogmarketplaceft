@@ -123,6 +123,27 @@
   color: var(--danger);
 }
 
+/* ---------- Same-Day Delivery badge ---------- */
+.same-day-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  padding: 3px 8px;
+  border-radius: var(--r-full);
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  color: #6ee7b7;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+.same-day-badge svg {
+  flex-shrink: 0;
+  color: #34d399;
+}
+
 .product-card-controls {
   display: grid;
   grid-template-columns: 1fr 1fr;

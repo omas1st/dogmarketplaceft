@@ -6,6 +6,25 @@ import "./ProductCard.css";
 
 const DEFAULT_SIZES = ["One Size"];
 
+const SameDayIcon = () => (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M3 7h11v8H3z" />
+    <path d="M14 10h4l3 3v2h-7z" />
+    <circle cx="7.5" cy="17.5" r="1.6" />
+    <circle cx="17.5" cy="17.5" r="1.6" />
+  </svg>
+);
+
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
 
@@ -57,6 +76,11 @@ export default function ProductCard({ product }) {
 
         <p className={`stock-status ${inStock ? "in" : "out"}`}>
           {inStock ? "In Stock" : "Out of Stock"}
+        </p>
+
+        <p className="same-day-badge">
+          <SameDayIcon />
+          Same-Day Delivery
         </p>
 
         <div className="product-card-controls">
