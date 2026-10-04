@@ -30,10 +30,22 @@ export default function AdminDashboard() {
         >
           Marketplace
         </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "guests"}
+          className={`admin-tab ${tab === "guests" ? "active" : ""}`}
+          onClick={() => setTab("guests")}
+        >
+          Guest Orders
+        </button>
       </div>
 
       <div className="admin-tab-panel">
-        {tab === "users" ? <AdminUsers /> : <AdminMarketplace />}
+        {tab === "users" && <AdminUsers section="users" />}
+        {tab === "marketplace" && <AdminMarketplace />}
+        {tab === "guests" && <AdminUsers section="guests" />}
       </div>
     </div>
   );
