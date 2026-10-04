@@ -7,21 +7,52 @@
 .home-hero {
   padding: 22px 18px;
   border-radius: var(--r-xl);
-  background:
-    radial-gradient(circle at 20% 0%, rgba(245, 158, 11, 0.16), transparent 55%),
-    linear-gradient(180deg, var(--surface), var(--surface-2));
   border: 1px solid var(--border);
   text-align: center;
   position: relative;
   overflow: hidden;
+
+  /* Background image comes from the --hero-image CSS variable set in Home.js.
+     The dark overlay gradient sits on top to keep the text readable. */
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(11, 13, 16, 0.72) 0%,
+      rgba(11, 13, 16, 0.82) 60%,
+      rgba(11, 13, 16, 0.92) 100%
+    ),
+    var(--hero-image, none);
+  background-size: cover, cover;
+  background-position: center center, center center;
+  background-repeat: no-repeat, no-repeat;
+  background-color: var(--surface);
+}
+
+/* Amber glow overlay kept on top of the image */
+.home-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 20% 0%,
+    rgba(245, 158, 11, 0.22),
+    transparent 55%
+  );
+  pointer-events: none;
+  z-index: 0;
 }
 
 .home-hero::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(500px 160px at 50% 100%, rgba(59, 130, 246, 0.07), transparent 70%);
+  background: radial-gradient(
+    500px 160px at 50% 100%,
+    rgba(59, 130, 246, 0.12),
+    transparent 70%
+  );
   pointer-events: none;
+  z-index: 0;
 }
 
 .home-hero h1 {
@@ -29,21 +60,25 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.2;
-  background: linear-gradient(180deg, #fff, #b7bfcb);
+  background: linear-gradient(180deg, #ffffff, #cfd6df);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   margin-bottom: 6px;
   position: relative;
+  z-index: 1;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
 }
 
 .home-hero p {
-  color: var(--text-muted);
+  color: #dbe2ea;
   font-size: 12.5px;
   max-width: 480px;
   margin: 0 auto;
   line-height: 1.5;
   position: relative;
+  z-index: 1;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
 }
 
 .home-toolbar {
@@ -112,6 +147,7 @@
   }
   .home-hero {
     padding: 32px 24px;
+    background-position: center 40%, center 40%;
   }
   .home-hero h1 {
     font-size: 26px;
@@ -131,7 +167,18 @@
 
 @media (min-width: 1024px) {
   .home-hero {
-    padding: 40px 32px;
+    padding: 56px 32px;
+    background-position: center 35%, center 35%;
+    /* Slightly lighter overlay on desktop so the image is more visible
+       while still keeping the headline legible */
+    background-image:
+      linear-gradient(
+        180deg,
+        rgba(11, 13, 16, 0.55) 0%,
+        rgba(11, 13, 16, 0.7) 60%,
+        rgba(11, 13, 16, 0.88) 100%
+      ),
+      var(--hero-image, none);
   }
   .home-hero h1 {
     font-size: 32px;

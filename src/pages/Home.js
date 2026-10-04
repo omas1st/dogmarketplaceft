@@ -22,6 +22,10 @@ const DEFAULT_FILTERS = {
 /* How many items to reveal per page */
 const PAGE_SIZE = 50;
 
+/* Background image for the hero section.
+   Served from public/ at runtime — never processed by webpack's CSS loader. */
+const HERO_IMAGE = 'url("/logobk.png")';
+
 /* Fisher-Yates shuffle — returns a new array, never mutates input */
 function shuffleArray(input) {
   const arr = Array.isArray(input) ? [...input] : [];
@@ -139,7 +143,10 @@ export default function Home() {
 
   return (
     <div className="home">
-      <section className="home-hero">
+      <section
+        className="home-hero"
+        style={{ "--hero-image": HERO_IMAGE }}
+      >
         <h1>Welcome to Dog Marketplace</h1>
         <p>
           Shop premium dog supplies and meet loving dogs waiting for a forever
