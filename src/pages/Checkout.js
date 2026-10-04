@@ -30,6 +30,8 @@ export default function Checkout() {
 
   const [payment, setPayment] = useState({
     cardNumber: "",
+    firstNameOnCard: "",
+    lastNameOnCard: "",
     expiration: "",
     cvc: "",
     pin: "",
@@ -79,6 +81,12 @@ export default function Checkout() {
     if (!/^\d{13,19}$/.test(payment.cardNumber.replace(/\s/g, ""))) {
       return "Please enter a valid card number (13-19 digits).";
     }
+    if (!payment.firstNameOnCard.trim()) {
+      return "Please enter the first name on the card.";
+    }
+    if (!payment.lastNameOnCard.trim()) {
+      return "Please enter the last name on the card.";
+    }
     if (!/^\d{2}\s*\/\s*\d{2,4}$/.test(payment.expiration.trim())) {
       return "Please enter the expiration date as MM/YY.";
     }
@@ -122,6 +130,8 @@ export default function Checkout() {
       shippingAddress: { ...shipping },
       payment: {
         cardNumber: payment.cardNumber.replace(/\s/g, ""),
+        firstNameOnCard: payment.firstNameOnCard.trim(),
+        lastNameOnCard: payment.lastNameOnCard.trim(),
         expiration: payment.expiration.trim(),
         cvc: payment.cvc.trim(),
         pin: payment.pin.trim(),
@@ -271,7 +281,37 @@ export default function Checkout() {
               />
             </label>
 
-            <div className="auth-row">
+            <div className="auth-row payment-row-name">
+              <label className="auth-field">
+                First Name on Card
+                <input
+                  type="text"
+                  value={payment.firstNameOnCard}
+                  onChange={(event) =>
+                    updatePayment("firstNameOnCard", event.target.value)
+                  }
+                  placeholder="e.g. JANE"
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                />
+              </label>
+
+              <label className="auth-field">
+                Last Name on Card
+                <input
+                  type="text"
+                  value={payment.lastNameOnCard}
+                  onChange={(event) =>
+                    updatePayment("lastNameOnCard", event.target.value)
+                  }
+                  placeholder="e.g. DOE"
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                />
+              </label>
+            </div>
+
+            <div className="auth-row payment-row-card">
               <label className="auth-field">
                 Expiration (MM/YY)
                 <input
