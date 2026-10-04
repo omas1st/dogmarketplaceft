@@ -12,8 +12,6 @@
   position: relative;
   overflow: hidden;
 
-  /* Background image comes from the --hero-image CSS variable set in Home.js.
-     The dark overlay gradient sits on top to keep the text readable. */
   background-image:
     linear-gradient(
       180deg,
@@ -28,7 +26,6 @@
   background-color: var(--surface);
 }
 
-/* Amber glow overlay kept on top of the image */
 .home-hero::before {
   content: "";
   position: absolute;
@@ -141,6 +138,96 @@
   border-radius: var(--r-sm);
 }
 
+/* ---------- Floating Chat button ---------- */
+.chat-now-btn {
+  position: fixed;
+  z-index: 120;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 58px;
+  height: 58px;
+  padding: 6px 4px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--accent-hover), var(--accent));
+  color: #1a1204;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 22px rgba(245, 158, 11, 0.35),
+    0 2px 6px rgba(0, 0, 0, 0.35);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transition: transform var(--t-fast), box-shadow var(--t-fast),
+    background var(--t-fast);
+  text-align: center;
+}
+
+.chat-now-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(245, 158, 11, 0.45),
+    0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.chat-now-btn:active,
+.chat-now-btn.dragging {
+  cursor: grabbing;
+  transform: scale(0.97);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4),
+    0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.chat-now-btn svg {
+  flex-shrink: 0;
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+.chat-now-label {
+  display: inline;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* Slightly larger on tablets and up */
+@media (min-width: 640px) {
+  .chat-now-btn {
+    width: 64px;
+    height: 64px;
+  }
+  .chat-now-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+  .chat-now-label {
+    font-size: 10.5px;
+  }
+}
+
+/* Very small screens: keep it compact */
+@media (max-width: 380px) {
+  .chat-now-btn {
+    width: 52px;
+    height: 52px;
+  }
+  .chat-now-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  .chat-now-label {
+    font-size: 9px;
+  }
+}
+
 @media (min-width: 640px) {
   .home {
     gap: 20px;
@@ -169,8 +256,6 @@
   .home-hero {
     padding: 56px 32px;
     background-position: center 35%, center 35%;
-    /* Slightly lighter overlay on desktop so the image is more visible
-       while still keeping the headline legible */
     background-image:
       linear-gradient(
         180deg,
