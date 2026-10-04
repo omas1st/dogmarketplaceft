@@ -26,7 +26,7 @@ export const PRICE_OPTIONS = [
 ];
 
 export const SORT_OPTIONS = [
-  { value: "featured", label: "Featured First" },
+  { value: "random", label: "Random / Shuffled" },
   { value: "price-asc", label: "Price: Low to High" },
   { value: "price-desc", label: "Price: High to Low" },
   { value: "newest", label: "Newest" },
