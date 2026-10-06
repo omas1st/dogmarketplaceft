@@ -7,6 +7,7 @@ import Footer from "./components/Footer";
 import CartDropdown from "./components/CartDropdown";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
+import AnalyticsTracker from "./components/AnalyticsTracker";
 
 import Home from "./pages/Home";
 import SignIn from "./pages/SignIn";
@@ -35,6 +36,10 @@ function Layout({ children }) {
 export default function App() {
   return (
     <div className="App">
+      {/* Fires a GA4 pageview on every route change.
+          Placed outside <Routes> so it mounts exactly once. */}
+      <AnalyticsTracker />
+
       <Routes>
         <Route
           path="/"
