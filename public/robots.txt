@@ -1,3 +1,12 @@
-# https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+
+# Keep the admin area and user account pages out of search results
+Disallow: /admin
+Disallow: /admin/
+Disallow: /dashboard
+Disallow: /cart
+Disallow: /checkout
+Disallow: /processing
+
+Sitemap: https://www.dogmarketplace.online/sitemap.xml
