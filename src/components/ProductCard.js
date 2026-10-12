@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { money } from "../utils/format";
 import "./ProductCard.css";
 
 const DEFAULT_SIZES = ["One Size"];
+const FOOD_CATEGORIES = ["food", "food_chews_feeding"];
 
 const SameDayIcon = () => (
   <svg
@@ -25,23 +26,75 @@ const SameDayIcon = () => (
   </svg>
 );
 
+/* Apply the discount % to a food size price (original → selling) */
+const applyDiscount = (price, discountPercent) => {
+  const p = Number(price) || 0;
+  const d = Number(discountPercent) || 0;
+  return p * (1 - d / 100);
+};
+
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
 
-  const sizes =
-    Array.isArray(product.sizes) && product.sizes.length
+  const isFood = FOOD_CATEGORIES.includes(product.category);
+  const discountPercent = Number(product.discountPercent) || 0;
+
+  const sizes = useMemo(() => {
+    if (isFood) {
+      if (Array.isArray(product.foodSizes) && product.foodSizes.length) {
+        return product.foodSizes.map((fs) => fs.size);
+      }
+      if (Array.isArray(product.sizes) && product.sizes.length) {
+        return product.sizes;
+      }
+      return ["15-lb bag"];
+    }
+    return Array.isArray(product.sizes) && product.sizes.length
       ? product.sizes
       : DEFAULT_SIZES;
+  }, [product.sizes, product.foodSizes, isFood]);
+
+  const colors = useMemo(() => {
+    if (isFood) return [];
+    return Array.isArray(product.colors) && product.colors.length
+      ? product.colors
+      : [];
+  }, [product.colors, isFood]);
 
   const [size, setSize] = useState(sizes[0]);
+  const [color, setColor] = useState(colors[0] || "");
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+
+  useEffect(() => {
+    setSize(sizes[0]);
+  }, [sizes]);
+
+  useEffect(() => {
+    setColor(colors[0] || "");
+  }, [colors]);
+
+  /* Food: look up the foodSize for the selected size. The stored price is
+     the ORIGINAL. Apply the product-level discount to get the selling
+     price. Non-food: use the product's pre-computed sellingPrice. */
+  const foodSizeEntry = useMemo(() => {
+    if (!isFood || !Array.isArray(product.foodSizes)) return null;
+    return product.foodSizes.find((fs) => fs.size === size) || null;
+  }, [isFood, product.foodSizes, size]);
+
+  const activeOriginal = isFood
+    ? Number(foodSizeEntry?.price) || 0
+    : Number(product.originalPrice) || 0;
+
+  const activePrice = isFood
+    ? applyDiscount(foodSizeEntry?.price || 0, discountPercent)
+    : Number(product.sellingPrice) || 0;
 
   const inStock = product.stockStatus !== "out_stock";
 
   const handleAddToCart = () => {
     if (!inStock) return;
-    addToCart(product, size, qty);
+    addToCart(product, size, qty, color, isFood ? activePrice : null);
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1500);
   };
@@ -67,10 +120,12 @@ export default function ProductCard({ product }) {
         </p>
 
         <div className="product-card-prices">
-          <span className="price-original">{money(product.originalPrice)}</span>
-          <span className="price-current">{money(product.sellingPrice)}</span>
-          {product.discountPercent > 0 && (
-            <span className="price-discount">-{product.discountPercent}%</span>
+          {activeOriginal > 0 && (
+            <span className="price-original">{money(activeOriginal)}</span>
+          )}
+          <span className="price-current">{money(activePrice)}</span>
+          {discountPercent > 0 && (
+            <span className="price-discount">-{discountPercent}%</span>
           )}
         </div>
 
@@ -83,7 +138,28 @@ export default function ProductCard({ product }) {
           Same-Day Delivery
         </p>
 
-        <div className="product-card-controls">
+        <div
+          className={`product-card-controls ${
+            colors.length ? "with-color" : ""
+          }`}
+        >
+          {colors.length > 0 && (
+            <label>
+              Colour
+              <select
+                value={color}
+                onChange={(event) => setColor(event.target.value)}
+                disabled={!inStock}
+              >
+                {colors.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
           <label>
             Size
             <select
@@ -106,11 +182,13 @@ export default function ProductCard({ product }) {
               onChange={(event) => setQty(Number(event.target.value))}
               disabled={!inStock}
             >
-              {Array.from({ length: 10 }, (_, index) => index + 1).map((num) => (
-                <option key={num} value={num}>
-                  {num}
-                </option>
-              ))}
+              {Array.from({ length: 10 }, (_, index) => index + 1).map(
+                (num) => (
+                  <option key={num} value={num}>
+                    {num}
+                  </option>
+                )
+              )}
             </select>
           </label>
         </div>

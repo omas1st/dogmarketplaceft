@@ -31,6 +31,7 @@ export default function CartDropdown() {
                 <div className="cart-item-info">
                   <span className="cart-item-title">{item.title}</span>
                   <span className="cart-item-meta">
+                    {item.color ? `${item.color} · ` : ""}
                     {item.size} × {item.qty}
                   </span>
                 </div>

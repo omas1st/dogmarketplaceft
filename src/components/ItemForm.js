@@ -5,7 +5,9 @@ import "./ItemForm.css";
 
 export const CATEGORY_OPTIONS = [
   { value: "dog_clothing_accessories", label: "Dog; Clothing and Accessories" },
-  { value: "food_chews_feeding", label: "Food, Chews and Feeding" },
+  { value: "food", label: "Food" },
+  { value: "chews", label: "Chews" },
+  { value: "feeding", label: "Feeding" },
   { value: "bed", label: "Bed" },
   { value: "collar_leashes_harnesses", label: "Collar, Leashes and Harnesses" },
   { value: "toy", label: "Toy" },
@@ -14,7 +16,17 @@ export const CATEGORY_OPTIONS = [
 
 export const DEFAULT_SIZES = "XS, S, M, L, XL, XXL";
 
+/* Default food-size options shown when a Food product is created for the
+   first time. Prices are blank and must be filled by the admin. */
+export const DEFAULT_FOOD_SIZES = [
+  { size: "5-lb bag", price: "" },
+  { size: "15-lb bag", price: "" },
+  { size: "30-lb bag", price: "" },
+  { size: "60-lb bag", price: "" },
+];
+
 const MAX_IMAGES = 4;
+const FOOD_CATEGORIES = ["food", "food_chews_feeding"];
 
 const EMPTY_FORM = {
   itemType: "dog_supply",
@@ -25,6 +37,7 @@ const EMPTY_FORM = {
   category: "dog_clothing_accessories",
   stockStatus: "in_stock",
   sizes: DEFAULT_SIZES,
+  colors: "",
 };
 
 function buildInitialImages(initialValues) {
@@ -42,6 +55,23 @@ function buildInitialImages(initialValues) {
   if (list.length === 0) return [""];
   if (list.length >= MAX_IMAGES) return list.slice(0, MAX_IMAGES);
   return [...list, ""];
+}
+
+function buildInitialFoodSizes(initialValues, category) {
+  if (!FOOD_CATEGORIES.includes(category)) return [];
+
+  if (
+    initialValues &&
+    Array.isArray(initialValues.foodSizes) &&
+    initialValues.foodSizes.length
+  ) {
+    return initialValues.foodSizes.map((fs) => ({
+      size: String(fs.size || "").trim(),
+      price: fs.price === 0 || fs.price === undefined ? "" : String(fs.price),
+    }));
+  }
+
+  return DEFAULT_FOOD_SIZES.map((fs) => ({ ...fs }));
 }
 
 const UploadIcon = () => (
@@ -70,18 +100,38 @@ export default function ItemForm({
 }) {
   const [form, setForm] = useState({ ...EMPTY_FORM, ...(initialValues || {}) });
   const [images, setImages] = useState(() => buildInitialImages(initialValues));
+  const [foodSizes, setFoodSizes] = useState(() =>
+    buildInitialFoodSizes(
+      initialValues,
+      (initialValues && initialValues.category) || EMPTY_FORM.category
+    )
+  );
   const [uploadingIndex, setUploadingIndex] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (initialValues) {
-      setForm({ ...EMPTY_FORM, ...initialValues });
+      const nextForm = { ...EMPTY_FORM, ...initialValues };
+      setForm(nextForm);
       setImages(buildInitialImages(initialValues));
+      setFoodSizes(buildInitialFoodSizes(initialValues, nextForm.category));
     }
   }, [initialValues]);
 
   const update = (key, value) =>
     setForm((prev) => ({ ...prev, [key]: value }));
+
+  const handleCategoryChange = (nextCategory) => {
+    setForm((prev) => ({ ...prev, category: nextCategory }));
+
+    if (FOOD_CATEGORIES.includes(nextCategory)) {
+      setFoodSizes((prev) =>
+        prev && prev.length
+          ? prev
+          : DEFAULT_FOOD_SIZES.map((fs) => ({ ...fs }))
+      );
+    }
+  };
 
   const sellingPrice = useMemo(() => {
     const original = parseFloat(form.originalPrice);
@@ -93,6 +143,16 @@ export default function ItemForm({
 
     return selling.toFixed(2);
   }, [form.originalPrice, form.discountPercent]);
+
+  const isFood = FOOD_CATEGORIES.includes(form.category);
+
+  /* Discounted preview for a food size — original price minus discount % */
+  const discountedFoodPrice = (price) => {
+    const p = Number(price) || 0;
+    const d = Number(form.discountPercent) || 0;
+    if (p <= 0) return "";
+    return (p * (1 - d / 100)).toFixed(2);
+  };
 
   /* --- Image slot management --- */
   const updateImageAt = (index, value) => {
@@ -144,6 +204,24 @@ export default function ItemForm({
     }
   };
 
+  /* --- Food size management --- */
+  const updateFoodSize = (index, key, value) => {
+    setFoodSizes((prev) =>
+      prev.map((fs, i) => (i === index ? { ...fs, [key]: value } : fs))
+    );
+  };
+
+  const addFoodSizeRow = () => {
+    setFoodSizes((prev) => [...prev, { size: "", price: "" }]);
+  };
+
+  const removeFoodSizeRow = (index) => {
+    setFoodSizes((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      return next.length ? next : [{ size: "", price: "" }];
+    });
+  };
+
   /* --- Submit --- */
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -157,7 +235,10 @@ export default function ItemForm({
       setError("Please enter the product description.");
       return;
     }
-    if (Number.isNaN(parseFloat(form.originalPrice))) {
+
+    /* Non-food: validate original price. Food: skip this — per-size
+       prices are validated below instead. */
+    if (!isFood && Number.isNaN(parseFloat(form.originalPrice))) {
       setError("Please enter a valid original price.");
       return;
     }
@@ -172,21 +253,57 @@ export default function ItemForm({
       return;
     }
 
+    const cleanColors = isFood
+      ? []
+      : Array.from(
+          new Set(
+            String(form.colors || "")
+              .split(",")
+              .map((c) => c.trim())
+              .filter(Boolean)
+          )
+        );
+
+    let cleanFoodSizes = [];
+    if (isFood) {
+      cleanFoodSizes = foodSizes
+        .map((fs) => ({
+          size: String(fs.size || "").trim(),
+          price: Number(fs.price) > 0 ? Number(fs.price) : 0,
+        }))
+        .filter((fs) => fs.size && fs.price > 0);
+
+      if (cleanFoodSizes.length === 0) {
+        setError(
+          "Please add at least one food size with a valid price (greater than 0)."
+        );
+        return;
+      }
+    }
+
+    const cleanSizes = isFood
+      ? cleanFoodSizes.map((fs) => fs.size)
+      : form.sizes
+      ? form.sizes
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+
     onSubmit({
       itemType: form.itemType,
       title: form.title.trim(),
       description: form.description.trim(),
-      originalPrice: Number(form.originalPrice),
+      /* Food products don't have a top-level original price — the
+         per-size prices carry the full cost data. */
+      originalPrice: isFood ? 0 : Number(form.originalPrice),
       discountPercent: Number(form.discountPercent) || 0,
-      sellingPrice: Number(sellingPrice),
+      sellingPrice: isFood ? 0 : Number(sellingPrice),
       category: form.category,
       stockStatus: form.stockStatus,
-      sizes: form.sizes
-        ? form.sizes
-            .split(",")
-            .map((size) => size.trim())
-            .filter(Boolean)
-        : [],
+      sizes: cleanSizes,
+      colors: cleanColors,
+      foodSizes: cleanFoodSizes,
       image: cleanImages[0],
       images: cleanImages,
     });
@@ -229,77 +346,180 @@ export default function ItemForm({
         />
       </label>
 
-      <div className="auth-row">
-        <label className="auth-field">
-          Original Price ($)
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            value={form.originalPrice}
-            onChange={(event) => update("originalPrice", event.target.value)}
-            placeholder="99.99"
-          />
-        </label>
-
-        <label className="auth-field">
-          Discount Percentage (%)
-          <input
-            type="number"
-            min="0"
-            max="100"
-            value={form.discountPercent}
-            onChange={(event) => update("discountPercent", event.target.value)}
-          />
-        </label>
-
-        <label className="auth-field">
-          Selling Price (auto)
-          <input
-            type="text"
-            value={sellingPrice === "" ? "" : money(sellingPrice)}
-            readOnly
-            className="readonly-input"
-          />
-        </label>
-      </div>
-
-      <div className="auth-row">
-        <label className="auth-field">
-          Category
-          <select
-            value={form.category}
-            onChange={(event) => update("category", event.target.value)}
-          >
-            {CATEGORY_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="auth-field">
-          Inventory Stock
-          <select
-            value={form.stockStatus}
-            onChange={(event) => update("stockStatus", event.target.value)}
-          >
-            <option value="in_stock">In Stock</option>
-            <option value="out_stock">Out of Stock</option>
-          </select>
-        </label>
-      </div>
+      {/* Category — placed directly after Description */}
+      <label className="auth-field">
+        Category
+        <select
+          value={form.category}
+          onChange={(event) => handleCategoryChange(event.target.value)}
+        >
+          {CATEGORY_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <label className="auth-field">
-        Available Sizes (comma separated)
-        <input
-          type="text"
-          value={form.sizes}
-          onChange={(event) => update("sizes", event.target.value)}
-          placeholder="XS, S, M, L, XL, XXL"
-        />
+        Inventory Stock
+        <select
+          value={form.stockStatus}
+          onChange={(event) => update("stockStatus", event.target.value)}
+        >
+          <option value="in_stock">In Stock</option>
+          <option value="out_stock">Out of Stock</option>
+        </select>
       </label>
+
+      {/* Colors — not shown for food */}
+      {!isFood && (
+        <label className="auth-field">
+          Available Colors (comma separated, optional)
+          <input
+            type="text"
+            value={form.colors || ""}
+            onChange={(event) => update("colors", event.target.value)}
+            placeholder="e.g. Red, Blue, Green, Black"
+          />
+          <span className="field-hint">
+            Leave blank if this product has no color options.
+          </span>
+        </label>
+      )}
+
+      {/* Price row — original price + discount + auto selling.
+          Shown for non-food ONLY. Food uses per-size pricing below. */}
+      {!isFood && (
+        <div className="auth-row">
+          <label className="auth-field">
+            Original Price ($)
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={form.originalPrice}
+              onChange={(event) =>
+                update("originalPrice", event.target.value)
+              }
+              placeholder="99.99"
+            />
+          </label>
+
+          <label className="auth-field">
+            Discount Percentage (%)
+            <input
+              type="number"
+              min="0"
+              max="100"
+              value={form.discountPercent}
+              onChange={(event) =>
+                update("discountPercent", event.target.value)
+              }
+            />
+          </label>
+
+          <label className="auth-field">
+            Selling Price (auto)
+            <input
+              type="text"
+              value={sellingPrice === "" ? "" : money(sellingPrice)}
+              readOnly
+              className="readonly-input"
+            />
+          </label>
+        </div>
+      )}
+
+      {/* Food sizes & prices — Food only */}
+      {isFood ? (
+        <section className="food-size-section">
+          <header className="food-size-header">
+            <h3>Food Sizes &amp; Prices</h3>
+            <span className="food-size-hint">
+              Each size's price is the original price; the discount below is
+              applied to every size.
+            </span>
+          </header>
+
+          <label className="auth-field food-size-discount-field">
+            Discount Percentage (%)
+            <input
+              type="number"
+              min="0"
+              max="100"
+              value={form.discountPercent}
+              onChange={(event) =>
+                update("discountPercent", event.target.value)
+              }
+            />
+            <span className="field-hint">
+              Applied to all size prices below.
+            </span>
+          </label>
+
+          <div className="food-size-list">
+            {foodSizes.map((fs, index) => (
+              <div className="food-size-row" key={index}>
+                <input
+                  type="text"
+                  className="food-size-input"
+                  placeholder="Size (e.g. 15-lb bag)"
+                  value={fs.size}
+                  onChange={(event) =>
+                    updateFoodSize(index, "size", event.target.value)
+                  }
+                />
+                <div className="food-size-price-wrap">
+                  <input
+                    type="number"
+                    className="food-price-input"
+                    min="0"
+                    step="0.01"
+                    placeholder="Original $"
+                    value={fs.price}
+                    onChange={(event) =>
+                      updateFoodSize(index, "price", event.target.value)
+                    }
+                  />
+                  {fs.price && Number(fs.price) > 0 && (
+                    <span className="food-size-discounted">
+                      → {money(discountedFoodPrice(fs.price))} after{" "}
+                      {Number(form.discountPercent) || 0}% off
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="food-size-remove"
+                  onClick={() => removeFoodSizeRow(index)}
+                  aria-label={`Remove ${fs.size || "size"}`}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            className="food-size-add"
+            onClick={addFoodSizeRow}
+          >
+            + Add size
+          </button>
+        </section>
+      ) : (
+        <label className="auth-field">
+          Available Sizes (comma separated)
+          <input
+            type="text"
+            value={form.sizes}
+            onChange={(event) => update("sizes", event.target.value)}
+            placeholder="XS, S, M, L, XL, XXL"
+          />
+        </label>
+      )}
 
       <section className="item-image-section">
         <header className="item-image-header">
@@ -381,11 +601,7 @@ export default function ItemForm({
         </div>
 
         {images.length < MAX_IMAGES && (
-          <button
-            type="button"
-            className="image-slot-add"
-            onClick={addSlot}
-          >
+          <button type="button" className="image-slot-add" onClick={addSlot}>
             + Add another image
           </button>
         )}

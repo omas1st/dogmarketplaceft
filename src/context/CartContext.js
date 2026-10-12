@@ -22,18 +22,27 @@ export function CartProvider({ children }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
-  const addToCart = (product, size, qty) => {
+  /* addToCart(product, size, qty, color = "", unitPriceOverride = null)
+     - For food products, unitPriceOverride carries the per-size price.
+     - For non-food products, we use product.sellingPrice. */
+  const addToCart = (product, size, qty, color = "", unitPriceOverride = null) => {
     const quantity = Math.max(1, Number(qty) || 1);
     const chosenSize = size || "One Size";
-    const key = `${product._id}__${chosenSize}`;
+    const chosenColor = String(color || "").trim();
+
+    const unitPrice =
+      unitPriceOverride !== null && unitPriceOverride !== undefined
+        ? Number(unitPriceOverride) || 0
+        : Number(product.sellingPrice) || 0;
+
+    /* Key identifies a unique (product, size, color) line */
+    const key = `${product._id}__${chosenSize}__${chosenColor}`;
 
     setItems((prev) => {
       const existing = prev.find((item) => item.key === key);
       if (existing) {
         return prev.map((item) =>
-          item.key === key
-            ? { ...item, qty: item.qty + quantity }
-            : item
+          item.key === key ? { ...item, qty: item.qty + quantity } : item
         );
       }
       return [
@@ -43,9 +52,10 @@ export function CartProvider({ children }) {
           productId: product._id,
           title: product.title,
           image: product.image,
-          price: Number(product.sellingPrice) || 0,
+          price: unitPrice,
           originalPrice: Number(product.originalPrice) || 0,
           size: chosenSize,
+          color: chosenColor,
           qty: quantity,
         },
       ];

@@ -207,3 +207,17 @@
   box-shadow: none;
   cursor: not-allowed;
 }
+
+/* Three-across layout when colour is present; two-across otherwise */
+.product-card-controls.with-color {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 420px) {
+  .product-card-controls.with-color {
+    grid-template-columns: 1fr 1fr;
+  }
+  .product-card-controls.with-color > label:first-child {
+    grid-column: 1 / -1;
+  }
+}

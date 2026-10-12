@@ -5,7 +5,8 @@ import { money } from "../utils/format";
 import "./Cart.css";
 
 export default function Cart() {
-  const { items, updateQty, removeFromCart, total, count, clearCart } = useCart();
+  const { items, updateQty, removeFromCart, total, count, clearCart } =
+    useCart();
   const navigate = useNavigate();
 
   if (!items.length) {
@@ -28,12 +29,22 @@ export default function Cart() {
         <ul className="cart-list">
           {items.map((item) => (
             <li key={item.key} className="cart-row">
-              <img src={item.image} alt={item.title} className="cart-row-image" />
+              <img
+                src={item.image}
+                alt={item.title}
+                className="cart-row-image"
+              />
 
               <div className="cart-row-info">
-                <Link to={`/product/${item.productId}`} className="cart-row-title">
+                <Link
+                  to={`/product/${item.productId}`}
+                  className="cart-row-title"
+                >
                   {item.title}
                 </Link>
+                {item.color && (
+                  <span className="cart-row-meta">Colour: {item.color}</span>
+                )}
                 <span className="cart-row-meta">Size: {item.size}</span>
                 <span className="cart-row-meta">
                   Unit price: {money(item.price)}

@@ -251,3 +251,16 @@
     max-width: 780px;
   }
 }
+
+.product-preview-controls.with-color {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 500px) {
+  .product-preview-controls.with-color {
+    grid-template-columns: 1fr 1fr;
+  }
+  .product-preview-controls.with-color > label:first-child {
+    grid-column: 1 / -1;
+  }
+}

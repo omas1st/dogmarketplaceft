@@ -41,6 +41,13 @@ export default function EditItem() {
             image: product.image,
             images,
             sizes: (product.sizes || []).join(", "),
+            colors: (product.colors || []).join(", "),
+            foodSizes: Array.isArray(product.foodSizes)
+              ? product.foodSizes.map((fs) => ({
+                  size: fs.size,
+                  price: fs.price,
+                }))
+              : [],
           });
         }
       } catch (err) {

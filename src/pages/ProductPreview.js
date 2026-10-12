@@ -11,6 +11,7 @@ import { money } from "../utils/format";
 import "./ProductPreview.css";
 
 const DEFAULT_SIZES = ["One Size"];
+const FOOD_CATEGORIES = ["food", "food_chews_feeding"];
 
 const SameDayIcon = () => (
   <svg
@@ -31,6 +32,12 @@ const SameDayIcon = () => (
   </svg>
 );
 
+const applyDiscount = (price, discountPercent) => {
+  const p = Number(price) || 0;
+  const d = Number(discountPercent) || 0;
+  return p * (1 - d / 100);
+};
+
 export default function ProductPreview() {
   const { id } = useParams();
   const { isAdmin } = useAuth();
@@ -43,6 +50,7 @@ export default function ProductPreview() {
   const [posting, setPosting] = useState(false);
 
   const [size, setSize] = useState(DEFAULT_SIZES[0]);
+  const [color, setColor] = useState("");
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [activeImage, setActiveImage] = useState("");
@@ -59,13 +67,34 @@ export default function ProductPreview() {
       const loadedReviews = loaded.reviews || data.reviews || [];
       setReviews(loadedReviews);
 
-      setSize(
-        Array.isArray(loaded.sizes) && loaded.sizes.length
-          ? loaded.sizes[0]
-          : "One Size"
-      );
+      const isFood = FOOD_CATEGORIES.includes(loaded.category);
 
-      // Build the gallery: prefer `images`, fall back to `image`, fall back to nothing
+      if (isFood) {
+        if (Array.isArray(loaded.foodSizes) && loaded.foodSizes.length) {
+          setSize(loaded.foodSizes[0].size);
+        } else if (Array.isArray(loaded.sizes) && loaded.sizes.length) {
+          setSize(loaded.sizes[0]);
+        } else {
+          setSize("15-lb bag");
+        }
+      } else {
+        setSize(
+          Array.isArray(loaded.sizes) && loaded.sizes.length
+            ? loaded.sizes[0]
+            : "One Size"
+        );
+      }
+
+      if (
+        !isFood &&
+        Array.isArray(loaded.colors) &&
+        loaded.colors.length > 0
+      ) {
+        setColor(loaded.colors[0]);
+      } else {
+        setColor("");
+      }
+
       const gallery =
         Array.isArray(loaded.images) && loaded.images.length
           ? loaded.images
@@ -87,10 +116,47 @@ export default function ProductPreview() {
     loadProduct();
   }, [loadProduct]);
 
-  const sizes =
-    product && Array.isArray(product.sizes) && product.sizes.length
+  const isFood = product
+    ? FOOD_CATEGORIES.includes(product.category)
+    : false;
+
+  const discountPercent = product ? Number(product.discountPercent) || 0 : 0;
+
+  const sizes = useMemo(() => {
+    if (!product) return DEFAULT_SIZES;
+
+    if (isFood) {
+      if (Array.isArray(product.foodSizes) && product.foodSizes.length) {
+        return product.foodSizes.map((fs) => fs.size);
+      }
+      if (Array.isArray(product.sizes) && product.sizes.length) {
+        return product.sizes;
+      }
+      return ["15-lb bag"];
+    }
+
+    return Array.isArray(product.sizes) && product.sizes.length
       ? product.sizes
       : DEFAULT_SIZES;
+  }, [product, isFood]);
+
+  const colors = useMemo(() => {
+    if (!product || isFood) return [];
+    return Array.isArray(product.colors) ? product.colors : [];
+  }, [product, isFood]);
+
+  const foodSizeEntry = useMemo(() => {
+    if (!product || !isFood || !Array.isArray(product.foodSizes)) return null;
+    return product.foodSizes.find((fs) => fs.size === size) || null;
+  }, [product, isFood, size]);
+
+  const activeOriginal = isFood
+    ? Number(foodSizeEntry?.price) || 0
+    : Number(product?.originalPrice) || 0;
+
+  const activePrice = isFood
+    ? applyDiscount(foodSizeEntry?.price || 0, discountPercent)
+    : Number(product?.sellingPrice) || 0;
 
   const galleryImages = useMemo(() => {
     if (!product) return [];
@@ -110,7 +176,7 @@ export default function ProductPreview() {
 
   const handleAddToCart = () => {
     if (!product || !inStock) return;
-    addToCart(product, size, qty);
+    addToCart(product, size, qty, color, isFood ? activePrice : null);
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1500);
   };
@@ -190,11 +256,13 @@ export default function ProductPreview() {
           </div>
 
           <div className="product-preview-prices">
-            <span className="price-original">{money(product.originalPrice)}</span>
-            <span className="price-current">{money(product.sellingPrice)}</span>
-            {product.discountPercent > 0 && (
+            {activeOriginal > 0 && (
+              <span className="price-original">{money(activeOriginal)}</span>
+            )}
+            <span className="price-current">{money(activePrice)}</span>
+            {discountPercent > 0 && (
               <span className="price-discount">
-                {product.discountPercent}% OFF
+                {discountPercent}% OFF
               </span>
             )}
           </div>
@@ -221,9 +289,30 @@ export default function ProductPreview() {
             <p>{product.description}</p>
           </div>
 
-          <div className="product-preview-controls">
+          <div
+            className={`product-preview-controls ${
+              colors.length ? "with-color" : ""
+            }`}
+          >
+            {colors.length > 0 && (
+              <label>
+                Colour
+                <select
+                  value={color}
+                  onChange={(event) => setColor(event.target.value)}
+                  disabled={!inStock}
+                >
+                  {colors.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+
             <label>
-              Size
+              {isFood ? "Weight" : "Size"}
               <select
                 value={size}
                 onChange={(event) => setSize(event.target.value)}
@@ -261,7 +350,11 @@ export default function ProductPreview() {
             onClick={handleAddToCart}
             disabled={!inStock}
           >
-            {!inStock ? "Out of Stock" : added ? "Added to Cart ✓" : "Add to Cart"}
+            {!inStock
+              ? "Out of Stock"
+              : added
+              ? "Added to Cart ✓"
+              : `Add to Cart · ${money(activePrice)}`}
           </button>
         </div>
       </div>

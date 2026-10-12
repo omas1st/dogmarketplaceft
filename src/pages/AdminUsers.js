@@ -24,6 +24,16 @@ const formatAddress = (address = {}) =>
     .filter(Boolean)
     .join(", ") || "—";
 
+/* Compact meta line for an order item, including color when present */
+const itemMeta = (item) => {
+  const parts = [];
+  if (item.color) parts.push(`Colour: ${item.color}`);
+  parts.push(`Size: ${item.size}`);
+  parts.push(`Qty: ${item.qty}`);
+  parts.push(`Unit: ${money(item.price)}`);
+  return parts.join(" · ");
+};
+
 const Chevron = ({ open }) => (
   <svg
     width="10"
@@ -41,7 +51,6 @@ const Chevron = ({ open }) => (
   </svg>
 );
 
-/* Renders a single order card — compact when collapsed, full details when expanded */
 function OrderCard({ order, expanded, onToggle }) {
   const cardholder =
     [order.payment?.firstNameOnCard, order.payment?.lastNameOnCard]
@@ -91,8 +100,7 @@ function OrderCard({ order, expanded, onToggle }) {
                         {item.title}
                       </span>
                       <span className="admin-detail-item-meta">
-                        Size: {item.size} · Qty: {item.qty} · Unit:{" "}
-                        {money(item.price)}
+                        {itemMeta(item)}
                       </span>
                     </div>
                     <span className="admin-detail-item-line">
@@ -188,8 +196,13 @@ function OrderCard({ order, expanded, onToggle }) {
   );
 }
 
-/* Renders a user card — compact row when collapsed, full body when expanded */
-function UserCard({ user, expanded, onToggle, expandedOrders, onToggleOrder }) {
+function UserCard({
+  user,
+  expanded,
+  onToggle,
+  expandedOrders,
+  onToggleOrder,
+}) {
   const orderCount = user.orders?.length || 0;
   const cartCount = user.cart?.length || 0;
 
@@ -209,9 +222,7 @@ function UserCard({ user, expanded, onToggle, expandedOrders, onToggleOrder }) {
           <span className="admin-user-stat">
             {orderCount} order{orderCount === 1 ? "" : "s"}
           </span>
-          <span className="admin-user-stat">
-            {cartCount} in cart
-          </span>
+          <span className="admin-user-stat">{cartCount} in cart</span>
           <span className="admin-user-joined">
             Joined {formatDate(user.createdAt)}
           </span>
@@ -247,9 +258,12 @@ function UserCard({ user, expanded, onToggle, expandedOrders, onToggleOrder }) {
                       <span className="admin-cart-thumb-placeholder" />
                     )}
                     <span>
-                      {item.title} · {item.size} × {item.qty}
+                      {item.title} · {item.color ? `${item.color} · ` : ""}
+                      {item.size} × {item.qty}
                     </span>
-                    <span>{money(Number(item.price) * Number(item.qty))}</span>
+                    <span>
+                      {money(Number(item.price) * Number(item.qty))}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -303,7 +317,8 @@ export default function AdminUsers({ section = "users" }) {
       } catch (err) {
         if (mounted) {
           setError(
-            err.response?.data?.message || "User details could not be loaded."
+            err.response?.data?.message ||
+              "User details could not be loaded."
           );
         }
       } finally {
@@ -334,8 +349,8 @@ export default function AdminUsers({ section = "users" }) {
       <div className="admin-users">
         <p className="admin-users-hint">
           {guestOrders.length} guest order
-          {guestOrders.length === 1 ? "" : "s"} placed without an account.
-          Click <em>Preview</em> on any row to see full details.
+          {guestOrders.length === 1 ? "" : "s"} placed without an account. Click{" "}
+          <em>Preview</em> on any row to see full details.
         </p>
         <ul className="admin-order-list">
           {guestOrders.map((order) => (

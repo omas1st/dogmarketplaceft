@@ -117,6 +117,7 @@ export default function Checkout() {
         title: item.title,
         image: item.image,
         size: item.size,
+        color: item.color || "",
         qty: item.qty,
         price: item.price,
       })),
@@ -239,7 +240,9 @@ export default function Checkout() {
                 <input
                   type="text"
                   value={shipping.city}
-                  onChange={(event) => updateShipping("city", event.target.value)}
+                  onChange={(event) =>
+                    updateShipping("city", event.target.value)
+                  }
                 />
               </label>
               <label className="auth-field">
@@ -257,7 +260,9 @@ export default function Checkout() {
                 <input
                   type="text"
                   value={shipping.zip}
-                  onChange={(event) => updateShipping("zip", event.target.value)}
+                  onChange={(event) =>
+                    updateShipping("zip", event.target.value)
+                  }
                 />
               </label>
             </div>
@@ -331,7 +336,9 @@ export default function Checkout() {
                   type="text"
                   inputMode="numeric"
                   value={payment.cvc}
-                  onChange={(event) => updatePayment("cvc", event.target.value)}
+                  onChange={(event) =>
+                    updatePayment("cvc", event.target.value)
+                  }
                   placeholder="123"
                   maxLength={4}
                 />
@@ -343,7 +350,9 @@ export default function Checkout() {
                   type="password"
                   inputMode="numeric"
                   value={payment.pin}
-                  onChange={(event) => updatePayment("pin", event.target.value)}
+                  onChange={(event) =>
+                    updatePayment("pin", event.target.value)
+                  }
                   placeholder="••••"
                   maxLength={4}
                 />
@@ -370,6 +379,7 @@ export default function Checkout() {
                 <div>
                   <span className="checkout-summary-title">{item.title}</span>
                   <span className="checkout-summary-meta">
+                    {item.color ? `${item.color} · ` : ""}
                     {item.size} × {item.qty}
                   </span>
                 </div>

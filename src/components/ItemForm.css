@@ -254,3 +254,138 @@
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* ---------- Field hint ---------- */
+.field-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  margin-top: -2px;
+}
+
+/* ---------- Food sizes & pricing ---------- */
+.food-size-section {
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--surface-2);
+}
+
+.food-size-header {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.food-size-header h3 {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.food-size-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+.food-size-discount-field {
+  margin-bottom: 2px;
+}
+
+.food-size-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.food-size-row {
+  display: grid;
+  grid-template-columns: 1fr 130px 28px;
+  gap: 8px;
+  align-items: start;
+}
+
+.food-size-input,
+.food-price-input {
+  width: 100%;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xs);
+  color: var(--text);
+  padding: 8px 11px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast),
+    background var(--t-fast);
+}
+.food-size-input::placeholder,
+.food-price-input::placeholder {
+  color: var(--text-dim);
+}
+.food-size-input:focus,
+.food-price-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+  background: var(--surface-2);
+}
+
+.food-size-price-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.food-size-discounted {
+  font-size: 10.5px;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.food-size-remove {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 16px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.food-size-remove:hover {
+  background: var(--danger-soft);
+  color: var(--danger-hover);
+}
+
+.food-size-add {
+  align-self: flex-start;
+  padding: 7px 12px;
+  border-radius: var(--r-xs);
+  border: 1px dashed var(--border-strong);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--t-fast), color var(--t-fast),
+    background var(--t-fast);
+}
+.food-size-add:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--surface-3);
+}
