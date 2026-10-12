@@ -16,6 +16,11 @@ export const CATEGORY_OPTIONS = [
 
 export const DEFAULT_SIZES = "XS, S, M, L, XL, XXL";
 
+/* Default colors pre-filled when creating a non-food product.
+   The admin can add, edit, or remove any of these. */
+export const DEFAULT_COLORS =
+  "Red, Blue, Green, Black, White, Grey, Brown, Yellow, Pink";
+
 /* Default food-size options shown when a Food product is created for the
    first time. Prices are blank and must be filled by the admin. */
 export const DEFAULT_FOOD_SIZES = [
@@ -37,7 +42,7 @@ const EMPTY_FORM = {
   category: "dog_clothing_accessories",
   stockStatus: "in_stock",
   sizes: DEFAULT_SIZES,
-  colors: "",
+  colors: DEFAULT_COLORS,
 };
 
 function buildInitialImages(initialValues) {
@@ -146,7 +151,6 @@ export default function ItemForm({
 
   const isFood = FOOD_CATEGORIES.includes(form.category);
 
-  /* Discounted preview for a food size — original price minus discount % */
   const discountedFoodPrice = (price) => {
     const p = Number(price) || 0;
     const d = Number(form.discountPercent) || 0;
@@ -236,8 +240,6 @@ export default function ItemForm({
       return;
     }
 
-    /* Non-food: validate original price. Food: skip this — per-size
-       prices are validated below instead. */
     if (!isFood && Number.isNaN(parseFloat(form.originalPrice))) {
       setError("Please enter a valid original price.");
       return;
@@ -294,8 +296,6 @@ export default function ItemForm({
       itemType: form.itemType,
       title: form.title.trim(),
       description: form.description.trim(),
-      /* Food products don't have a top-level original price — the
-         per-size prices carry the full cost data. */
       originalPrice: isFood ? 0 : Number(form.originalPrice),
       discountPercent: Number(form.discountPercent) || 0,
       sellingPrice: isFood ? 0 : Number(sellingPrice),
@@ -346,7 +346,6 @@ export default function ItemForm({
         />
       </label>
 
-      {/* Category — placed directly after Description */}
       <label className="auth-field">
         Category
         <select
@@ -372,10 +371,10 @@ export default function ItemForm({
         </select>
       </label>
 
-      {/* Colors — not shown for food */}
+      {/* Colors — not shown for food; pre-filled with defaults on new items */}
       {!isFood && (
         <label className="auth-field">
-          Available Colors (comma separated, optional)
+          Available Colors (comma separated)
           <input
             type="text"
             value={form.colors || ""}
@@ -383,13 +382,12 @@ export default function ItemForm({
             placeholder="e.g. Red, Blue, Green, Black"
           />
           <span className="field-hint">
-            Leave blank if this product has no color options.
+            Defaults to the standard color set — edit or clear them if this
+            product shouldn&apos;t have any color options.
           </span>
         </label>
       )}
 
-      {/* Price row — original price + discount + auto selling.
-          Shown for non-food ONLY. Food uses per-size pricing below. */}
       {!isFood && (
         <div className="auth-row">
           <label className="auth-field">
@@ -431,14 +429,13 @@ export default function ItemForm({
         </div>
       )}
 
-      {/* Food sizes & prices — Food only */}
       {isFood ? (
         <section className="food-size-section">
           <header className="food-size-header">
             <h3>Food Sizes &amp; Prices</h3>
             <span className="food-size-hint">
-              Each size's price is the original price; the discount below is
-              applied to every size.
+              Each size&apos;s price is the original price; the discount below
+              is applied to every size.
             </span>
           </header>
 
