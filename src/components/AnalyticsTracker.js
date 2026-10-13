@@ -1,27 +1,34 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { initGA, trackPageView } from "../utils/analytics";
 
-/* Invisible component — place inside <BrowserRouter> so it can read
-   the current route via useLocation. Fires a GA pageview on every
-   route change. */
+/* Fire a TikTok page() call safely — the ttq script may not have
+   loaded yet on very first render, so we guard against that. */
+const fireTiktokPage = () => {
+  try {
+    if (typeof window !== "undefined" && window.ttq && window.ttq.page) {
+      window.ttq.page();
+    }
+  } catch (error) {
+    // Never crash the app if TikTok's pixel misbehaves.
+    console.warn("TikTok pixel page() failed:", error);
+  }
+};
+
 export default function AnalyticsTracker() {
   const location = useLocation();
-  const [ready, setReady] = useState(false);
 
   /* Initialize GA4 once on mount */
   useEffect(() => {
     initGA();
-    setReady(true);
   }, []);
 
-  /* Fire a pageview each time the route changes.
-     location.search is included so query strings count as distinct views. */
+  /* Fire GA4 + TikTok pageviews on every route change */
   useEffect(() => {
-    if (!ready) return;
     const path = location.pathname + location.search;
     trackPageView(path);
-  }, [ready, location]);
+    fireTiktokPage();
+  }, [location]);
 
   return null;
 }
