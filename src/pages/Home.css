@@ -198,7 +198,6 @@
   line-height: 1;
 }
 
-/* Slightly larger on tablets and up */
 @media (min-width: 640px) {
   .chat-now-btn {
     width: 64px;
@@ -213,7 +212,6 @@
   }
 }
 
-/* Very small screens: keep it compact */
 @media (max-width: 380px) {
   .chat-now-btn {
     width: 52px;
@@ -277,5 +275,197 @@
   }
   .home-toolbar {
     padding: 16px;
+  }
+}
+
+/* ============================================================ */
+/* Full-page loading splash                                     */
+/* ============================================================ */
+.home-loader-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(
+      circle at 50% 30%,
+      rgba(245, 158, 11, 0.08),
+      transparent 60%
+    ),
+    linear-gradient(180deg, #0b0d10 0%, #101318 100%);
+  animation: home-loader-fade-in 240ms ease-out;
+}
+
+@keyframes home-loader-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.home-loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  padding: 0 24px;
+}
+
+/* Dual-ring spinner */
+.home-loader-spinner {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 6px;
+}
+
+.home-loader-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  display: block;
+}
+
+.home-loader-ring-outer {
+  inset: 0;
+  border-top-color: var(--accent);
+  border-right-color: rgba(245, 158, 11, 0.35);
+  animation: home-loader-spin 1.15s cubic-bezier(0.55, 0.15, 0.45, 0.85)
+    infinite;
+}
+
+.home-loader-ring-inner {
+  inset: 12px;
+  border-bottom-color: #34d399;
+  border-left-color: rgba(52, 211, 153, 0.3);
+  animation: home-loader-spin-rev 1.6s cubic-bezier(0.55, 0.15, 0.45, 0.85)
+    infinite;
+}
+
+.home-loader-core {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.85),
+    0 0 36px rgba(245, 158, 11, 0.4);
+  animation: home-loader-pulse 1.15s ease-in-out infinite;
+}
+
+@keyframes home-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes home-loader-spin-rev {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes home-loader-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.7;
+  }
+}
+
+/* Text */
+.home-loader-title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  margin: 0;
+  background: linear-gradient(180deg, #ffffff, #b7bfcb);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  padding-left: 0.28em;
+}
+
+.home-loader-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+/* Small pulsing dots beneath the subtitle */
+.home-loader-dots {
+  display: inline-flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.home-loader-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.35;
+  animation: home-loader-dot 1.2s ease-in-out infinite;
+}
+
+.home-loader-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.home-loader-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes home-loader-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+/* On very small screens keep the spinner compact */
+@media (max-width: 380px) {
+  .home-loader-spinner {
+    width: 64px;
+    height: 64px;
+  }
+  .home-loader-ring-inner {
+    inset: 10px;
+  }
+  .home-loader-title {
+    font-size: 12px;
+    letter-spacing: 0.22em;
+  }
+  .home-loader-subtitle {
+    font-size: 11px;
+  }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .home-loader-ring-outer,
+  .home-loader-ring-inner,
+  .home-loader-core,
+  .home-loader-dots span {
+    animation-duration: 3s;
   }
 }

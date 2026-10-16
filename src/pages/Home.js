@@ -45,10 +45,37 @@ function shuffleArray(input) {
   return arr;
 }
 
+/* ---------- Full-page loading splash ---------- */
+function FullPageLoader() {
+  return (
+    <div
+      className="home-loader-overlay"
+      role="status"
+      aria-live="polite"
+      aria-label="Loading Dog Marketplace"
+    >
+      <div className="home-loader-content">
+        <div className="home-loader-spinner">
+          <span className="home-loader-ring home-loader-ring-outer" />
+          <span className="home-loader-ring home-loader-ring-inner" />
+          <span className="home-loader-core" />
+        </div>
+
+        <h2 className="home-loader-title">Dog Marketplace</h2>
+        <p className="home-loader-subtitle">Preparing your store…</p>
+
+        <div className="home-loader-dots" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* Floating chat button — small, draggable, snaps back on release */
 function ChatNowButton() {
-  /* Position stored as { x, y } in px from top-left of viewport.
-     Initialised lazily to the bottom-right corner. */
   const [pos, setPos] = useState(() => ({
     x: typeof window !== "undefined" ? window.innerWidth - 70 : 0,
     y: typeof window !== "undefined" ? window.innerHeight - 150 : 0,
@@ -57,11 +84,9 @@ function ChatNowButton() {
   const dragStart = useRef(null);
   const moved = useRef(false);
 
-  /* Match the CSS dimensions of the circular button */
   const BUTTON_SIZE = 58;
   const EDGE_GAP = 12;
 
-  /* Clamp the position so the button stays on screen */
   const clamp = (x, y) => {
     if (typeof window === "undefined") return { x, y };
     const maxX = window.innerWidth - BUTTON_SIZE - EDGE_GAP;
@@ -72,7 +97,6 @@ function ChatNowButton() {
     };
   };
 
-  /* Keep the button inside the viewport if the window is resized */
   useEffect(() => {
     const handleResize = () => {
       setPos((prev) => clamp(prev.x, prev.y));
@@ -83,7 +107,6 @@ function ChatNowButton() {
   }, []);
 
   const handlePointerDown = (event) => {
-    /* Ignore right-clicks and multi-touch */
     if (event.button !== undefined && event.button !== 0) return;
 
     dragStart.current = {
@@ -95,7 +118,6 @@ function ChatNowButton() {
     moved.current = false;
     setDragging(true);
 
-    /* Bind to window so the drag continues outside the button */
     window.addEventListener("mousemove", handlePointerMove);
     window.addEventListener("mouseup", handlePointerUp);
     window.addEventListener("touchmove", handlePointerMove, { passive: false });
@@ -111,7 +133,6 @@ function ChatNowButton() {
     const dx = point.clientX - dragStart.current.pointerX;
     const dy = point.clientY - dragStart.current.pointerY;
 
-    /* Anything beyond a few pixels counts as a drag, not a click */
     if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
       moved.current = true;
     }
@@ -122,7 +143,6 @@ function ChatNowButton() {
     );
     setPos(next);
 
-    /* Prevent page scroll while dragging on touch devices */
     if (event.cancelable) event.preventDefault();
   };
 
@@ -136,7 +156,6 @@ function ChatNowButton() {
     window.removeEventListener("touchend", handlePointerUp);
   };
 
-  /* Cleanup if unmounted mid-drag */
   useEffect(() => {
     return () => {
       window.removeEventListener("mousemove", handlePointerMove);
@@ -148,7 +167,6 @@ function ChatNowButton() {
   }, []);
 
   const handleClick = (event) => {
-    /* If the pointer moved, treat it as a drag, not a click */
     if (moved.current) {
       event.preventDefault();
       moved.current = false;
@@ -201,6 +219,10 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  /* Flips to true once the first fetch resolves (success OR failure).
+     While false, the full-page splash covers the whole screen. */
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+
   const allRef = useRef([]);
   const poolRef = useRef([]);
 
@@ -234,6 +256,9 @@ export default function Home() {
       setProducts([]);
     } finally {
       setLoading(false);
+      /* Always flip the flag — success or failure — so the user is
+         never stuck on the overlay. */
+      setInitialLoadComplete(true);
     }
   }, [tab, search, filters]);
 
@@ -281,6 +306,11 @@ export default function Home() {
     poolRef.current = pool;
     setProducts((prev) => [...prev, ...next]);
   };
+
+  /* Full-page splash — covers everything until products arrive. */
+  if (!initialLoadComplete) {
+    return <FullPageLoader />;
+  }
 
   return (
     <div className="home">
